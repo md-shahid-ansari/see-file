@@ -1,10 +1,14 @@
 
 import { createPdfViewer } from "./modules/pdf/pdf-viewer.js";
+import { createCodeViewer } from "./modules/code/code-viewer.js";
 
-// ------------------------------------
+import {
+  getFileExtension,
+  getLanguage,
+  isSupportedTextExtension
+} from "./modules/code/language-map.js";
+
 // Elements
-// ------------------------------------
-
 const stage = document.getElementById("stage");
 const openFileButton = document.getElementById("open-file");
 const fileInput = document.getElementById("file-input");
@@ -16,95 +20,122 @@ const position = document.getElementById("position");
 const fileName = document.getElementById("file-name");
 const status = document.getElementById("status");
 
-// ------------------------------------
-// PDF Viewer
-// ------------------------------------
-
+// Viewers
 const pdfViewer = createPdfViewer({
   stage,
-
   maxWidth: 1100,
   minZoom: 1,
   maxZoom: 4,
 
   onPageChange(page, total) {
-    if (position) {
-      position.textContent = `${page} / ${total}`;
-    }
+    position.textContent = `${page} / ${total}`;
   },
 
   onError(error) {
     console.error("PDF Viewer Error:", error);
-
-    if (status) {
-      status.textContent = "Unable to open PDF";
-    }
+    status.textContent = "PDF viewing error";
   }
 });
 
-// ------------------------------------
-// Open PDF
-// ------------------------------------
+const codeViewer = createCodeViewer({ stage });
 
-async function openPdfFile(file) {
+// Open selected file
+async function openFile(file) {
   if (!file) return;
 
-  const extension = file.name.split(".").pop().toLowerCase();
+  const extension = getFileExtension(file.name);
+  const isPdf =
+    extension === "pdf" || file.type === "application/pdf";
 
-  if (extension !== "pdf" && file.type !== "application/pdf") {
-    status.textContent = "Currently only PDF viewing is connected.";
-    return;
-  }
+  const isText =
+    isSupportedTextExtension(extension) ||
+    file.type.startsWith("text/");
 
   try {
-    status.textContent = "Opening PDF...";
-
+    status.textContent = "Opening file...";
     fileName.textContent = file.name;
 
-    await pdfViewer.open(file);
+    // PDF
+    if (isPdf) {
+      codeViewer.close();
+      stage.classList.remove("code-stage");
 
-    status.textContent = "PDF opened successfully";
+      previousButton.hidden = false;
+      nextButton.hidden = false;
+      position.hidden = false;
+
+      await pdfViewer.open(file);
+
+      status.textContent = "PDF opened successfully";
+      return;
+    }
+
+    // Code and text
+    if (isText) {
+      await pdfViewer.close();
+
+      stage.classList.add("code-stage");
+
+      previousButton.hidden = true;
+      nextButton.hidden = true;
+      position.hidden = true;
+
+      await codeViewer.open(file, getLanguage(extension));
+
+      status.textContent = "File opened successfully";
+      return;
+    }
+
+    // Unsupported format
+    await pdfViewer.close();
+    codeViewer.close();
+
+    stage.classList.remove("code-stage");
+
+    previousButton.hidden = true;
+    nextButton.hidden = true;
+    position.hidden = true;
+
+    const message = document.createElement("div");
+    message.className = "viewer-error";
+    message.textContent =
+      "This file format is not supported yet.";
+
+    stage.replaceChildren(message);
+
+    status.textContent = "Unsupported file format";
 
   } catch (error) {
-    console.error("PDF opening failed:", error);
+    console.error("File opening error:", error);
 
-    status.textContent = "Failed to open PDF";
+    status.textContent = "Unable to open file";
 
-    fileName.textContent = "";
+    const message = document.createElement("div");
+    message.className = "viewer-error";
+    message.textContent = "Unable to open this file.";
 
-    alert(
-      "Unable to open this PDF. Please check the file and try again."
-    );
+    stage.replaceChildren(message);
   }
 }
 
-// ------------------------------------
-// Open File Button
-// ------------------------------------
-
+// Open file picker
 openFileButton.addEventListener("click", () => {
   fileInput.click();
 });
 
-// ------------------------------------
-// File Selection
-// ------------------------------------
+// Handle selected file
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files?.[0];
 
-fileInput.addEventListener("change", async (event) => {
-  const file = event.target.files?.[0];
-
-  if (!file) return;
-
-  await openPdfFile(file);
+  if (file) {
+    await openFile(file);
+  }
 
   // Allow selecting the same file again
   fileInput.value = "";
 });
 
-// ------------------------------------
-// PDF Navigation
-// ------------------------------------
-
+// PDF navigation
 previousButton.addEventListener("click", () => {
   pdfViewer.previousPage();
 });
@@ -113,9 +144,6 @@ nextButton.addEventListener("click", () => {
   pdfViewer.nextPage();
 });
 
-// ------------------------------------
-// Initial State
-// ------------------------------------
-
-status.textContent = "Ready";
+// Initial state
 position.textContent = "- / -";
+status.textContent = "Ready";
