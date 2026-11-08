@@ -3,6 +3,7 @@ import { createPdfViewer } from "./modules/pdf/pdf-viewer.js";
 import { createCodeViewer } from "./modules/code/code-viewer.js";
 import { createDocxViewer } from "./modules/docx/docx-viewer.js";
 import { createSpreadsheetViewer } from "./modules/spreadsheet/spreadsheet-viewer.js";
+import { createPowerPointViewer } from "./modules/powerpoint/powerpoint-viewer.js";
 
 import {
   getFileExtension,
@@ -10,7 +11,10 @@ import {
   isSupportedTextExtension
 } from "./modules/code/language-map.js";
 
+// ------------------------------------
 // Elements
+// ------------------------------------
+
 const stage = document.getElementById("stage");
 const openFileButton = document.getElementById("open-file");
 const fileInput = document.getElementById("file-input");
@@ -22,7 +26,10 @@ const position = document.getElementById("position");
 const fileName = document.getElementById("file-name");
 const status = document.getElementById("status");
 
+// ------------------------------------
 // Viewers
+// ------------------------------------
+
 const pdfViewer = createPdfViewer({
   stage,
   maxWidth: 1100,
@@ -48,7 +55,28 @@ const spreadsheetViewer = createSpreadsheetViewer({
   maxZoom: 2
 });
 
+const powerpointViewer = createPowerPointViewer({
+  stage,
+  maxWidth: 1100,
+  minZoom: 1,
+  maxZoom: 4,
+
+  onSlideCount(total) {
+    if (total > 0) {
+      status.textContent = `PowerPoint: ${total} slides`;
+    }
+  },
+
+  onError(error) {
+    console.error("PowerPoint Viewer Error:", error);
+    status.textContent = "PowerPoint viewing error";
+  }
+});
+
+// ------------------------------------
 // Toolbar
+// ------------------------------------
+
 function showPdfControls(show) {
   previousButton.hidden = !show;
   nextButton.hidden = !show;
@@ -59,7 +87,10 @@ function showPdfControls(show) {
   }
 }
 
+// ------------------------------------
 // File routing
+// ------------------------------------
+
 async function openFile(file) {
   if (!file) return;
 
@@ -80,6 +111,11 @@ async function openFile(file) {
     "csv"
   ].includes(extension);
 
+  const isPowerPoint = [
+    "pptx",
+    "ppt"
+  ].includes(extension);
+
   const isText =
     isSupportedTextExtension(extension) ||
     file.type.startsWith("text/");
@@ -93,11 +129,13 @@ async function openFile(file) {
       docxViewer.close();
       codeViewer.close();
       spreadsheetViewer.close();
+      powerpointViewer.close();
 
       stage.classList.remove(
         "code-stage",
         "docx-stage",
-        "spreadsheet-stage"
+        "spreadsheet-stage",
+        "ppt-stage"
       );
 
       showPdfControls(true);
@@ -113,10 +151,12 @@ async function openFile(file) {
       await pdfViewer.close();
       codeViewer.close();
       spreadsheetViewer.close();
+      powerpointViewer.close();
 
       stage.classList.remove(
         "code-stage",
-        "spreadsheet-stage"
+        "spreadsheet-stage",
+        "ppt-stage"
       );
 
       showPdfControls(false);
@@ -132,10 +172,12 @@ async function openFile(file) {
       await pdfViewer.close();
       docxViewer.close();
       codeViewer.close();
+      powerpointViewer.close();
 
       stage.classList.remove(
         "code-stage",
-        "docx-stage"
+        "docx-stage",
+        "ppt-stage"
       );
 
       showPdfControls(false);
@@ -146,15 +188,40 @@ async function openFile(file) {
       return;
     }
 
+    // PowerPoint
+    if (isPowerPoint) {
+      await pdfViewer.close();
+      docxViewer.close();
+      codeViewer.close();
+      spreadsheetViewer.close();
+
+      stage.classList.remove(
+        "code-stage",
+        "docx-stage",
+        "spreadsheet-stage"
+      );
+
+      showPdfControls(false);
+
+      await powerpointViewer.open(file);
+
+      status.textContent =
+        `PowerPoint opened: ${powerpointViewer.getSlideCount()} slides`;
+
+      return;
+    }
+
     // Code and Text
     if (isText) {
       await pdfViewer.close();
       docxViewer.close();
       spreadsheetViewer.close();
+      powerpointViewer.close();
 
       stage.classList.remove(
         "docx-stage",
-        "spreadsheet-stage"
+        "spreadsheet-stage",
+        "ppt-stage"
       );
 
       stage.classList.add("code-stage");
@@ -172,11 +239,13 @@ async function openFile(file) {
     docxViewer.close();
     codeViewer.close();
     spreadsheetViewer.close();
+    powerpointViewer.close();
 
     stage.classList.remove(
       "code-stage",
       "docx-stage",
-      "spreadsheet-stage"
+      "spreadsheet-stage",
+      "ppt-stage"
     );
 
     showPdfControls(false);
@@ -204,14 +273,18 @@ async function openFile(file) {
     stage.classList.remove(
       "code-stage",
       "docx-stage",
-      "spreadsheet-stage"
+      "spreadsheet-stage",
+      "ppt-stage"
     );
 
     fileName.textContent = "";
   }
 }
 
+// ------------------------------------
 // File picker
+// ------------------------------------
+
 openFileButton.addEventListener("click", () => {
   fileInput.click();
 });
@@ -226,7 +299,10 @@ fileInput.addEventListener("change", async () => {
   fileInput.value = "";
 });
 
+// ------------------------------------
 // PDF navigation
+// ------------------------------------
+
 previousButton.addEventListener("click", () => {
   pdfViewer.previousPage();
 });
@@ -235,6 +311,9 @@ nextButton.addEventListener("click", () => {
   pdfViewer.nextPage();
 });
 
+// ------------------------------------
 // Initial state
+// ------------------------------------
+
 showPdfControls(false);
 status.textContent = "Ready";
