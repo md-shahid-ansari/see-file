@@ -1,11 +1,10 @@
 
 /* ========================================
-   SeeFile - DOCX Viewer
+   SeeFile - DOCX Viewer with Fit & Zoom
 ======================================== */
 
 .document-stage.docx-stage {
   position: relative;
-
   display: block;
 
   width: 100%;
@@ -15,65 +14,95 @@
   overflow-x: auto;
   overflow-y: auto;
 
-  background: #e9edf2;
+  background: #343a46;
 
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
 }
 
-/* Viewer wrapper */
+/* Main viewer */
 
 .docx-viewer {
+  position: relative;
+
   width: 100%;
   min-height: 100%;
-
-  padding: 24px 12px 40px;
 
   box-sizing: border-box;
+  padding: 54px 0 24px;
 }
 
-/* Style container created by docx-preview */
+/* Generated DOCX styles */
 
 .docx-styles {
-  display: contents;
+  display: none;
 }
 
-/* Content container */
+/* Document content */
 
 .docx-content {
+  position: relative;
+
   width: 100%;
   min-height: 100%;
 }
 
-/* DOCX page wrapper */
+/* Page collection */
 
 .docx-content .docx-wrapper {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   align-items: center;
 
   width: 100%;
   min-height: 100%;
 
-  padding: 0;
+  padding: 0 !important;
   margin: 0 auto;
 
-  background: transparent;
+  background: transparent !important;
 }
 
-/* Individual Word pages */
+/* Scaled page wrapper */
 
-.docx-content .docx {
+.docx-page-zoom-shell {
+  position: relative;
+
+  display: block;
   flex: 0 0 auto;
 
-  margin: 0 auto 20px !important;
+  box-sizing: border-box;
+
+  margin: 0 auto 18px;
+
+  overflow: visible;
+}
+
+/* Actual Word page */
+
+.docx-content .docx {
+  position: absolute !important;
+
+  top: 0;
+  left: 0;
+
+  display: block;
+
+  box-sizing: border-box;
+
+  margin: 0 !important;
+
+  transform-origin: top left;
+
+  max-width: none !important;
 
   background: #ffffff;
 
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.3);
 }
 
-/* Keep document images within their page */
+/* Images */
 
 .docx-content .docx img {
   max-width: 100%;
@@ -87,9 +116,10 @@
   justify-content: center;
 
   min-height: 180px;
+  padding: 24px;
 
-  color: #6b7280;
-  font-size: 14px;
+  color: #d1d5db;
+  text-align: center;
 }
 
 /* Error */
@@ -110,10 +140,10 @@
 
 @media (max-width: 520px) {
   .docx-viewer {
-    padding: 12px 6px 24px;
+    padding-top: 54px;
   }
 
-  .docx-content .docx {
-    margin-bottom: 12px !important;
+  .docx-page-zoom-shell {
+    margin-bottom: 12px;
   }
 }
