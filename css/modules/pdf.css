@@ -1,0 +1,106 @@
+/* css/modules/pdf.css */
+
+/* PDF scroll container */
+
+.document-stage.pdf-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: auto;
+
+  background: #343a46;
+
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  /*
+   * Native one-finger scrolling.
+   * JavaScript handles two-finger zoom.
+   */
+  touch-action: pan-x pan-y;
+}
+
+/* Continuous PDF document */
+
+.pdf-document {
+  position: relative;
+  box-sizing: border-box;
+
+  min-height: 100%;
+  width: 100%;
+
+  padding: 56px 0 24px;
+}
+
+/* Each page row */
+
+.pdf-page-row {
+  display: flex;
+  align-items: flex-start;
+
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 0 0 16px;
+
+  min-height: 1px;
+}
+
+/* Page layout box */
+
+.pdf-page-shell {
+  position: relative;
+  flex: none;
+
+  box-sizing: border-box;
+
+  overflow: visible;
+
+  background: #fff;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, .35);
+}
+
+/* Actual PDF canvas */
+
+.pdf-page-canvas {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  display: block;
+
+  max-width: none;
+  max-height: none;
+
+  transform-origin: top left;
+
+  background: #fff;
+}
+
+/* Placeholder before a page renders */
+
+.pdf-page-placeholder {
+  position: absolute;
+  inset: 0;
+
+  background: #f4f5f7;
+
+  display: grid;
+  place-items: center;
+}
+
+/* Mobile */
+
+@media (max-width: 520px) {
+  .document-stage.pdf-stage {
+    width: 100%;
+  }
+
+  .pdf-document {
+    padding-top: 54px;
+  }
+}

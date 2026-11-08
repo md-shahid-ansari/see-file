@@ -1,54 +1,87 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
-  <title>SeeFile</title>
-  <link rel="stylesheet" href="./style.css">
-  <!-- Keep all library files inside this repository. -->
-  <script defer src="./vendor/pdfjs/pdf.min.js"></script>
-  <script defer src="./vendor/jszip/jszip.min.js"></script>
-  <script defer src="./vendor/docx/docx-preview.min.js"></script>
-  <script defer src="./vendor/xlsx/xlsx.full.min.js"></script>
-  <script defer src="./app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SeeFile - Document Viewer</title>
+  <meta
+    name="description"
+    content="Open and view documents directly in your browser with SeeFile."
+  >
+
+  <!-- Base and application styles -->
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/app.css">
+  <link rel="stylesheet" href="./css/viewer.css">
+
+  <!-- PDF module styles -->
+  <link rel="stylesheet" href="./css/modules/pdf.css">
+
+  <!-- Vendor libraries -->
+  <script src="./vendor/pdfjs/pdf.min.js"></script>
+  <script src="./vendor/jszip/jszip.min.js"></script>
+  <script src="./vendor/docx/docx-preview.min.js"></script>
+  <script src="./vendor/xlsx/xlsx.full.min.js"></script>
+
+  <!-- Main application -->
+  <script type="module" src="./js/app.js"></script>
 </head>
+
 <body>
-  <main id="app">
-    <section id="home" class="home-screen">
-      <div class="home-card">
+  <div id="app">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-brand">
         <h1>SeeFile</h1>
-        <p class="intro">Open and read documents in your browser. Files stay on your device.</p>
-        <button id="chooseFile" class="primary-button" type="button">Choose a document</button>
+      </div>
+
+      <div class="header-actions">
+        <button id="open-file" type="button">
+          Open file
+        </button>
+
         <input
-          id="fileInput"
+          id="file-input"
           type="file"
           hidden
-          multiple
-          accept=".pdf,.docx,.xlsx,.xls,.csv,.tsv,.txt,.md,.json,.xml,.html,.htm,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.avif"
         >
-        <p class="hint">You can also drag and drop files here.</p>
-        <div class="formats" aria-label="Supported formats">
-          <span>PDF</span><span>DOCX</span><span>XLSX / XLS</span><span>CSV / TSV</span>
-          <span>TXT / MD</span><span>JSON / XML</span><span>HTML</span><span>Images</span>
-        </div>
       </div>
-    </section>
+    </header>
 
-    <section id="viewer" class="viewer-screen" hidden aria-label="Document viewer">
-      <nav class="viewer-controls" aria-label="Viewer controls">
-        <button id="openAnother" class="control-button" type="button" title="Open another file">Open another</button>
-        <div class="page-controls">
-          <button id="previous" class="control-button" type="button" title="Previous page or sheet" disabled>Previous</button>
-          <span id="position" class="position" aria-live="polite"></span>
-          <button id="next" class="control-button" type="button" title="Next page or sheet" disabled>Next</button>
-        </div>
-      </nav>
-      <div id="stage" class="document-stage" tabindex="0" aria-label="Document content">
-        <div class="loading-message">Choose a document to begin.</div>
+    <!-- Viewer toolbar -->
+    <nav class="viewer-toolbar" aria-label="Document controls">
+      <div class="toolbar-left">
+        <button id="previous" type="button" aria-label="Previous page">
+          Previous
+        </button>
+
+        <span id="position">- / -</span>
+
+        <button id="next" type="button" aria-label="Next page">
+          Next
+        </button>
       </div>
-      <div id="message" class="viewer-message" role="status" aria-live="polite" hidden></div>
-    </section>
-  </main>
+
+      <div class="toolbar-right">
+        <span id="file-name"></span>
+      </div>
+    </nav>
+
+    <!-- Document viewer -->
+    <main id="stage" class="document-stage">
+      <div class="viewer-empty-state">
+        <p>Open a document to start viewing.</p>
+      </div>
+    </main>
+
+    <!-- Status -->
+    <footer class="app-footer">
+      <span id="status">Ready</span>
+    </footer>
+
+  </div>
 </body>
 </html>

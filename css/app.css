@@ -1,0 +1,203 @@
+
+/* ========================================
+   SeeFile - Application Layout
+======================================== */
+
+#app {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  overflow: hidden;
+}
+
+/* Header */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  flex: 0 0 var(--header-height);
+  height: var(--header-height);
+
+  padding: 0 20px;
+
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+
+  z-index: 10;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+}
+
+.app-brand h1 {
+  margin: 0;
+
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+
+  color: var(--color-primary);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-actions button {
+  border: 0;
+  border-radius: var(--radius-small);
+
+  padding: 9px 16px;
+
+  color: #ffffff;
+  background: var(--color-primary);
+
+  font-weight: 600;
+
+  transition: background 0.15s ease;
+}
+
+.header-actions button:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Toolbar */
+
+.viewer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  flex: 0 0 var(--toolbar-height);
+  min-height: var(--toolbar-height);
+
+  padding: 0 16px;
+
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+
+  z-index: 5;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+}
+
+.toolbar-left button {
+  padding: 6px 12px;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+
+  color: var(--color-text);
+  background: #ffffff;
+}
+
+.toolbar-left button:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+#position {
+  min-width: 55px;
+
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--color-text-muted);
+}
+
+#file-name {
+  max-width: 260px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* Footer */
+
+.app-footer {
+  display: flex;
+  align-items: center;
+
+  flex: 0 0 var(--footer-height);
+  height: var(--footer-height);
+
+  padding: 0 16px;
+
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+
+  border-top: 1px solid var(--color-border);
+
+  font-size: 12px;
+}
+
+/* Mobile */
+
+@media (max-width: 520px) {
+  :root {
+    --header-height: 54px;
+    --toolbar-height: 44px;
+    --footer-height: 28px;
+  }
+
+  .app-header {
+    padding: 0 12px;
+  }
+
+  .app-brand h1 {
+    font-size: 19px;
+  }
+
+  .header-actions button {
+    padding: 7px 12px;
+  }
+
+  .viewer-toolbar {
+    padding: 0 8px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    gap: 6px;
+  }
+
+  .toolbar-left button {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  #position {
+    min-width: 45px;
+    font-size: 12px;
+  }
+
+  #file-name {
+    max-width: 110px;
+    font-size: 11px;
+  }
+
+  .app-footer {
+    padding: 0 10px;
+  }
+}
