@@ -22,7 +22,11 @@
     sheetIndex: 0,
     objectUrl: null,
     renderToken: 0,
-    pdfRenderTask: null
+    pdfRenderTask: null,
+    activePointers: new Map(),
+    pinchStartDistance: 0,
+    pinchStartZoom: 1,
+    documentZoom: 1
   };
 
   const PDF_EXTENSIONS = new Set(["pdf"]);
@@ -45,6 +49,37 @@
   previousButton.addEventListener("click", () => move(-1));
   nextButton.addEventListener("click", () => move(1));
 
+  // Pinch the document itself. The browser viewport remains at 100%.
+  stage.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch") return;
+    state.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (state.activePointers.size === 2) {
+      const points = Array.from(state.activePointers.values());
+      state.pinchStartDistance = pointerDistance(points[0], points[1]);
+      state.pinchStartZoom = state.documentZoom;
+    }
+  }, { passive: true });
+
+  stage.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "touch" || !state.activePointers.has(event.pointerId)) return;
+    state.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (state.activePointers.size !== 2 || !state.pinchStartDistance) return;
+    event.preventDefault();
+    const points = Array.from(state.activePointers.values());
+    const distance = pointerDistance(points[0], points[1]);
+    const nextZoom = clamp(state.pinchStartZoom * (distance / state.pinchStartDistance), 1, 4);
+    state.documentZoom = nextZoom;
+    stage.style.setProperty("--doc-zoom", String(nextZoom));
+  }, { passive: false });
+
+  const finishPointer = (event) => {
+    state.activePointers.delete(event.pointerId);
+    if (state.activePointers.size < 2) state.pinchStartDistance = 0;
+  };
+  stage.addEventListener("pointerup", finishPointer, { passive: true });
+  stage.addEventListener("pointercancel", finishPointer, { passive: true });
+  stage.addEventListener("lostpointercapture", finishPointer, { passive: true });
+
   document.addEventListener("dragover", (event) => event.preventDefault());
   document.addEventListener("drop", async (event) => {
     event.preventDefault();
@@ -54,6 +89,14 @@
 
   // Do not allow accidental browser navigation when a file is dropped outside the stage.
   window.addEventListener("dragover", (event) => event.preventDefault());
+
+  function pointerDistance(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
+
+  function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
+  }
 
   async function loadSelection(files) {
     state.files = files.filter((file) => file && typeof file.name === "string");
@@ -68,6 +111,10 @@
     if (!file) return;
 
     const token = ++state.renderToken;
+    state.documentZoom = 1;
+    state.activePointers.clear();
+    state.pinchStartDistance = 0;
+    stage.style.setProperty("--doc-zoom", "1");
     await cleanupCurrentDocument();
     state.file = file;
     state.kind = detectFileKind(file);
@@ -234,7 +281,7 @@
     canvas.width = Math.ceil(viewport.width * dpr);
     canvas.height = Math.ceil(viewport.height * dpr);
     canvas.style.width = `${Math.ceil(viewport.width)}px`;
-    canvas.style.height = `${Math.ceil(viewport.height)}px`;
+    canvas.style.height = "auto";
     canvas.className = "pdf-page";
     canvas.setAttribute("aria-label", `PDF page ${state.pdfPage}`);
 

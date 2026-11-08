@@ -71,11 +71,18 @@ button { font: inherit; }
 }
 .document-stage {
   position: relative; flex: 1; min-height: 0; width: 100%;
-  overflow: auto; overscroll-behavior: contain;
+  overflow: auto;
   padding: 0; margin: 0; background: #222b38;
   -webkit-overflow-scrolling: touch;
-  /* Leave pinch gestures to the browser. No forced fit-to-screen scaling. */
-  touch-action: pan-x pan-y pinch-zoom;
+  /* One-finger movement scrolls the document. Two-finger pinch is handled
+     by app.js so the document zooms instead of the browser page. */
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+}
+#stage > :first-child {
+  transform: scale(var(--doc-zoom, 1));
+  transform-origin: top center;
+  will-change: transform;
 }
 .loading-message {
   min-height: 100%; display: grid; place-items: center;
@@ -90,25 +97,25 @@ button { font: inherit; }
 }
 .viewer-message.error { background: rgba(92, 28, 38, .96); }
 
-/* Rendered content keeps its intrinsic dimensions. It may overflow the viewport;
-   the reader can pan and use the browser's native pinch gesture. */
-#pdfPages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 54px 12px 24px; width: max-content; min-width: 100%; }
-.pdf-page { display: block; background: white; box-shadow: 0 3px 18px rgba(0,0,0,.35); max-width: none; }
-#docxView { display: block; width: max-content; min-width: 100%; padding: 54px 12px 24px; background: #7c8490; color: #222; }
+/* Documents are centered and width-constrained on desktop and mobile.
+   Their height follows the original aspect ratio; app.js handles pinch zoom. */
+#pdfPages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 54px 12px 24px; width: 100%; max-width: 1100px; min-width: 0; margin: 0 auto; }
+.pdf-page { display: block; background: white; box-shadow: 0 3px 18px rgba(0,0,0,.35); width: auto; max-width: 100%; height: auto; }
+#docxView { display: block; width: 100%; max-width: 1100px; min-width: 0; margin: 0 auto; padding: 54px 12px 24px; background: #7c8490; color: #222; overflow-x: auto; }
 #docxView .docx-wrapper { margin: 0 auto; }
-#docxView section.docx { margin: 0 auto 16px; box-shadow: 0 2px 12px rgba(0,0,0,.28); }
-#sheetView { width: max-content; min-width: 100%; min-height: 100%; padding: 54px 12px 24px; background: #fff; color: #202938; }
+#docxView section.docx { max-width: 100%; margin: 0 auto 16px; box-shadow: 0 2px 12px rgba(0,0,0,.28); }
+#sheetView { width: 100%; max-width: 1100px; min-width: 0; min-height: 100%; margin: 0 auto; padding: 54px 12px 24px; background: #fff; color: #202938; overflow-x: auto; }
 .sheet-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .sheet-tab { border: 1px solid #c6d1df; border-radius: 7px; padding: 7px 11px; color: #26364b; background: #e8eef7; cursor: pointer; }
 .sheet-tab.active { background: #d2e3ff; border-color: #6c9de4; }
-.sheet-table-wrap { overflow: visible; }
+.sheet-table-wrap { overflow: auto; max-width: 100%; }
 table.grid { border-collapse: collapse; white-space: pre-wrap; font-size: 13px; background: #fff; }
 table.grid th, table.grid td { border: 1px solid #d8dee8; padding: 6px 9px; max-width: 420px; overflow-wrap: anywhere; text-align: left; vertical-align: top; }
 table.grid th { background: #edf2f8; color: #23344c; }
 .table-note { margin: 8px 0; color: #6b7788; font-size: 12px; }
-#textView { display: block; width: max-content; min-width: 100%; min-height: 100%; margin: 0; padding: 58px 16px 24px; background: #fff; color: #222; white-space: pre; overflow-wrap: normal; font: 14px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; }
-#imageView { display: grid; place-items: center; min-width: 100%; min-height: 100%; padding: 54px 12px 20px; }
-#imageView img { display: block; width: auto; height: auto; max-width: none; max-height: none; object-fit: initial; }
+#textView { display: block; width: 100%; max-width: 1100px; min-width: 0; min-height: 100%; margin: 0 auto; padding: 58px 16px 24px; background: #fff; color: #222; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; }
+#imageView { display: grid; place-items: start center; width: 100%; max-width: 1100px; min-width: 0; min-height: 100%; margin: 0 auto; padding: 54px 12px 20px; }
+#imageView img { display: block; width: auto; height: auto; max-width: 100%; max-height: none; object-fit: contain; }
 #htmlView { display: block; width: 100%; height: 100%; min-height: 100%; border: 0; margin: 0; background: white; }
 .error-panel {
   margin: 64px 14px 20px; padding: 16px; max-width: 720px;
@@ -118,5 +125,6 @@ table.grid th { background: #edf2f8; color: #23344c; }
 @media (max-width: 520px) {
   .control-button { padding: 8px 10px; font-size: 12px; }
   .position { font-size: 11px; min-width: 34px; }
-  #pdfPages { align-items: flex-start; }
+  #pdfPages { align-items: center; padding-left: 8px; padding-right: 8px; }
+  #docxView, #sheetView, #textView, #imageView { max-width: 100%; }
 }
