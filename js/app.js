@@ -2,6 +2,7 @@
 import { createPdfViewer } from "./modules/pdf/pdf-viewer.js";
 import { createCodeViewer } from "./modules/code/code-viewer.js";
 import { createDocxViewer } from "./modules/docx/docx-viewer.js";
+import { createSpreadsheetViewer } from "./modules/spreadsheet/spreadsheet-viewer.js";
 
 import {
   getFileExtension,
@@ -9,10 +10,7 @@ import {
   isSupportedTextExtension
 } from "./modules/code/language-map.js";
 
-// ------------------------------------
 // Elements
-// ------------------------------------
-
 const stage = document.getElementById("stage");
 const openFileButton = document.getElementById("open-file");
 const fileInput = document.getElementById("file-input");
@@ -24,10 +22,7 @@ const position = document.getElementById("position");
 const fileName = document.getElementById("file-name");
 const status = document.getElementById("status");
 
-// ------------------------------------
 // Viewers
-// ------------------------------------
-
 const pdfViewer = createPdfViewer({
   stage,
   maxWidth: 1100,
@@ -45,13 +40,15 @@ const pdfViewer = createPdfViewer({
 });
 
 const codeViewer = createCodeViewer({ stage });
-
 const docxViewer = createDocxViewer({ stage });
 
-// ------------------------------------
-// Toolbar helpers
-// ------------------------------------
+const spreadsheetViewer = createSpreadsheetViewer({
+  stage,
+  minZoom: 0.5,
+  maxZoom: 2
+});
 
+// Toolbar
 function showPdfControls(show) {
   previousButton.hidden = !show;
   nextButton.hidden = !show;
@@ -62,14 +59,7 @@ function showPdfControls(show) {
   }
 }
 
-function clearFileName() {
-  fileName.textContent = "";
-}
-
-// ------------------------------------
 // File routing
-// ------------------------------------
-
 async function openFile(file) {
   if (!file) return;
 
@@ -84,6 +74,12 @@ async function openFile(file) {
     file.type ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
+  const isSpreadsheet = [
+    "xlsx",
+    "xls",
+    "csv"
+  ].includes(extension);
+
   const isText =
     isSupportedTextExtension(extension) ||
     file.type.startsWith("text/");
@@ -96,8 +92,14 @@ async function openFile(file) {
     if (isPdf) {
       docxViewer.close();
       codeViewer.close();
+      spreadsheetViewer.close();
 
-      stage.classList.remove("code-stage", "docx-stage");
+      stage.classList.remove(
+        "code-stage",
+        "docx-stage",
+        "spreadsheet-stage"
+      );
+
       showPdfControls(true);
 
       await pdfViewer.open(file);
@@ -110,8 +112,13 @@ async function openFile(file) {
     if (isDocx) {
       await pdfViewer.close();
       codeViewer.close();
+      spreadsheetViewer.close();
 
-      stage.classList.remove("code-stage");
+      stage.classList.remove(
+        "code-stage",
+        "spreadsheet-stage"
+      );
+
       showPdfControls(false);
 
       await docxViewer.open(file);
@@ -120,12 +127,36 @@ async function openFile(file) {
       return;
     }
 
+    // Excel and CSV
+    if (isSpreadsheet) {
+      await pdfViewer.close();
+      docxViewer.close();
+      codeViewer.close();
+
+      stage.classList.remove(
+        "code-stage",
+        "docx-stage"
+      );
+
+      showPdfControls(false);
+
+      await spreadsheetViewer.open(file);
+
+      status.textContent = "Spreadsheet opened successfully";
+      return;
+    }
+
     // Code and Text
     if (isText) {
       await pdfViewer.close();
       docxViewer.close();
+      spreadsheetViewer.close();
 
-      stage.classList.remove("docx-stage");
+      stage.classList.remove(
+        "docx-stage",
+        "spreadsheet-stage"
+      );
+
       stage.classList.add("code-stage");
 
       showPdfControls(false);
@@ -140,16 +171,20 @@ async function openFile(file) {
     await pdfViewer.close();
     docxViewer.close();
     codeViewer.close();
+    spreadsheetViewer.close();
 
-    stage.classList.remove("code-stage", "docx-stage");
+    stage.classList.remove(
+      "code-stage",
+      "docx-stage",
+      "spreadsheet-stage"
+    );
+
     showPdfControls(false);
 
     const message = document.createElement("div");
     message.className = "viewer-error";
     message.textContent =
-      extension === "doc"
-        ? "Legacy .doc files are not supported yet. Please use .docx."
-        : "This file format is not supported yet.";
+      "This file format is not supported yet.";
 
     stage.replaceChildren(message);
 
@@ -165,15 +200,18 @@ async function openFile(file) {
     message.textContent = "Unable to open this file.";
 
     stage.replaceChildren(message);
-    stage.classList.remove("code-stage", "docx-stage");
-    clearFileName();
+
+    stage.classList.remove(
+      "code-stage",
+      "docx-stage",
+      "spreadsheet-stage"
+    );
+
+    fileName.textContent = "";
   }
 }
 
-// ------------------------------------
-// Open file picker
-// ------------------------------------
-
+// File picker
 openFileButton.addEventListener("click", () => {
   fileInput.click();
 });
@@ -188,10 +226,7 @@ fileInput.addEventListener("change", async () => {
   fileInput.value = "";
 });
 
-// ------------------------------------
 // PDF navigation
-// ------------------------------------
-
 previousButton.addEventListener("click", () => {
   pdfViewer.previousPage();
 });
@@ -200,9 +235,6 @@ nextButton.addEventListener("click", () => {
   pdfViewer.nextPage();
 });
 
-// ------------------------------------
 // Initial state
-// ------------------------------------
-
 showPdfControls(false);
 status.textContent = "Ready";
