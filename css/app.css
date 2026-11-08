@@ -71,47 +71,6 @@
   background: var(--color-primary-hover);
 }
 
-/* Toolbar */
-
-.viewer-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  flex: 0 0 var(--toolbar-height);
-  min-height: var(--toolbar-height);
-
-  padding: 0 16px;
-
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-
-  z-index: 5;
-}
-
-.toolbar-left,
-.toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  min-width: 0;
-}
-
-.toolbar-left button {
-  padding: 6px 12px;
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-small);
-
-  color: var(--color-text);
-  background: #ffffff;
-}
-
-.toolbar-left button:hover:not(:disabled) {
-  background: #f3f4f6;
-}
-
 #position {
   min-width: 55px;
 
@@ -133,31 +92,11 @@
   font-size: 13px;
 }
 
-/* Footer */
-
-.app-footer {
-  display: flex;
-  align-items: center;
-
-  flex: 0 0 var(--footer-height);
-  height: var(--footer-height);
-
-  padding: 0 16px;
-
-  color: var(--color-text-muted);
-  background: var(--color-surface);
-
-  border-top: 1px solid var(--color-border);
-
-  font-size: 12px;
-}
-
 /* Mobile */
 
 @media (max-width: 520px) {
   :root {
     --header-height: 54px;
-    --toolbar-height: 44px;
     --footer-height: 28px;
   }
 
@@ -173,20 +112,6 @@
     padding: 7px 12px;
   }
 
-  .viewer-toolbar {
-    padding: 0 8px;
-  }
-
-  .toolbar-left,
-  .toolbar-right {
-    gap: 6px;
-  }
-
-  .toolbar-left button {
-    padding: 5px 8px;
-    font-size: 12px;
-  }
-
   #position {
     min-width: 45px;
     font-size: 12px;
@@ -196,8 +121,55 @@
     max-width: 110px;
     font-size: 11px;
   }
+}
 
+/* App footer */
+.app-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  background: var(--surface-color, #ffffff);
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+  line-height: 1.4;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.footer-status {
+  flex-shrink: 0;
+  font-weight: 500;
+  color: var(--text-primary, #374151);
+}
+
+.footer-separator {
+  flex-shrink: 0;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.footer-file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.footer-position {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
   .app-footer {
-    padding: 0 10px;
+    min-height: 38px;
+    padding: 7px 10px;
+    gap: 7px;
+    font-size: 11px;
   }
 }

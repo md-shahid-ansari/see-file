@@ -56,25 +56,6 @@
       </div>
     </header>
 
-    <!-- Viewer toolbar -->
-    <nav class="viewer-toolbar" aria-label="Document controls">
-      <div class="toolbar-left">
-        <button id="previous" type="button" aria-label="Previous page">
-          Previous
-        </button>
-
-        <span id="position">- / -</span>
-
-        <button id="next" type="button" aria-label="Next page">
-          Next
-        </button>
-      </div>
-
-      <div class="toolbar-right">
-        <span id="file-name"></span>
-      </div>
-    </nav>
-
     <!-- Document viewer -->
     <main id="stage" class="document-stage">
       <div class="viewer-empty-state">
@@ -84,7 +65,11 @@
 
     <!-- Status -->
     <footer class="app-footer">
-      <span id="status">Ready</span>
+      <span id="status" class="footer-status">Ready</span>
+      <span class="footer-separator" aria-hidden="true">·</span>
+      <span id="file-name" class="footer-file-name"></span>
+      <span class="footer-separator" aria-hidden="true">·</span>
+      <span id="position" class="footer-position">- / -</span>
     </footer>
 
   </div>

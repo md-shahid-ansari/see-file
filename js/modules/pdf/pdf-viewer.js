@@ -404,45 +404,6 @@ export function createPdfViewer(options = {}) {
     return getState();
   }
 
-  /* -----------------------------------------------------
-     PAGE NAVIGATION
-     ----------------------------------------------------- */
-
-  function goToPage(pageNumber, smooth = true) {
-    const target = Math.min(
-      slots.length,
-      Math.max(1, Math.floor(pageNumber))
-    );
-
-    const slot = slots[target - 1];
-
-    if (!slot) return;
-
-    renderSlot(slot, generation);
-
-    stage.scrollTo({
-      top: slot.row.offsetTop,
-      left: 0,
-      behavior: smooth ? "smooth" : "auto"
-    });
-
-    currentPage = target;
-
-    onPageChange(currentPage, slots.length);
-  }
-
-  function nextPage() {
-    if (currentPage < slots.length) {
-      goToPage(currentPage + 1);
-    }
-  }
-
-  function previousPage() {
-    if (currentPage > 1) {
-      goToPage(currentPage - 1);
-    }
-  }
-
   function updateCurrentPage() {
     if (!slots.length) return;
 
@@ -644,10 +605,6 @@ export function createPdfViewer(options = {}) {
     open,
     close,
     destroy,
-
-    nextPage,
-    previousPage,
-    goToPage,
 
     setZoom,
     resetZoom,

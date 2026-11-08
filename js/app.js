@@ -19,9 +19,6 @@ const stage = document.getElementById("stage");
 const openFileButton = document.getElementById("open-file");
 const fileInput = document.getElementById("file-input");
 
-const previousButton = document.getElementById("previous");
-const nextButton = document.getElementById("next");
-
 const position = document.getElementById("position");
 const fileName = document.getElementById("file-name");
 const status = document.getElementById("status");
@@ -78,8 +75,6 @@ const powerpointViewer = createPowerPointViewer({
 // ------------------------------------
 
 function showPdfControls(show) {
-  previousButton.hidden = !show;
-  nextButton.hidden = !show;
   position.hidden = !show;
 
   if (!show) {
@@ -302,18 +297,6 @@ fileInput.addEventListener("change", async () => {
   }
 
   fileInput.value = "";
-});
-
-// ------------------------------------
-// PDF navigation
-// ------------------------------------
-
-previousButton.addEventListener("click", () => {
-  pdfViewer.previousPage();
-});
-
-nextButton.addEventListener("click", () => {
-  pdfViewer.nextPage();
 });
 
 // ------------------------------------

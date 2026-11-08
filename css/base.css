@@ -20,7 +20,6 @@
   --color-danger: #dc2626;
 
   --header-height: 60px;
-  --toolbar-height: 48px;
   --footer-height: 32px;
 
   --radius-small: 6px;
@@ -89,4 +88,29 @@ svg {
 
 .hidden {
   display: none !important;
+}
+
+/* Thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #526078 transparent;
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #526078;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #71829d;
 }
