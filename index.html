@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>SeeFile — Document Viewer</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#17243a;--line:#26364f;--text:#e8eef8;--muted:#9aabc2;--accent:#78a9ff;--good:#72d6a0;--bad:#ff8b8b}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{display:flex;flex-direction:column;min-height:100vh}
+header{height:64px;display:flex;align-items:center;gap:14px;padding:0 20px;border-bottom:1px solid var(--line);background:#0e1828;position:sticky;top:0;z-index:5}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#78a9ff,#9b8cff);display:grid;place-items:center;color:#081225;font-weight:900;font-size:18px}
+.brand{font-weight:750;letter-spacing:.2px}.subbrand{font-size:12px;color:var(--muted)}
+.header-right{margin-left:auto;color:var(--muted);font-size:12px}
+main{width:min(1200px,100%);margin:0 auto;padding:26px 18px 40px;flex:1}
+.welcome{border:1px dashed #405575;background:linear-gradient(140deg,#14243b,#101b2c);border-radius:18px;padding:34px 22px;text-align:center}
+.welcome h1{font-size:clamp(24px,4vw,36px);margin:0 0 8px}.welcome p{color:var(--muted);margin:0 auto 22px;max-width:620px}
+.open-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:11px;background:#78a9ff;color:#071426;font-weight:750;padding:12px 20px;cursor:pointer}
+.open-btn:hover{filter:brightness(1.08)}.drop-hint{margin-top:13px;color:var(--muted);font-size:13px}
+#fileInput{display:none}
+.support{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:24px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:#c3d1e4;font-size:12px}
+#viewer{display:none}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:10px;margin-bottom:14px}
+.toolbtn,.select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;font:inherit}
+.toolbtn:disabled{opacity:.35;cursor:not-allowed}.toolbtn:hover:not(:disabled){border-color:var(--accent)}
+.filetitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:min(38vw,440px)}
+.meta{font-size:12px;color:var(--muted);margin-left:auto}
+.stage{min-height:58vh;border:1px solid var(--line);border-radius:14px;background:#131d2d;overflow:auto;padding:20px}
+.empty{min-height:50vh;display:grid;place-items:center;color:var(--muted);text-align:center}
+#pdfPages{display:flex;flex-direction:column;align-items:center;gap:18px}
+.pdf-page{background:white;box-shadow:0 5px 24px #0006;max-width:100%}
+#docxView{background:white;color:#222;max-width:900px;margin:0 auto;padding:22px;min-height:50vh;overflow:auto}
+#docxView .docx-wrapper{background:#e8e8e8;padding:18px}
+#docxView section.docx{box-shadow:0 2px 8px #0002;margin:0 auto 18px}
+#sheetView{overflow:auto;background:#fff;color:#202938;border-radius:8px;padding:10px}
+.sheet-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sheet-tab{background:#e8eef7;border:1px solid #c6d1df;color:#26364b;border-radius:7px;padding:6px 10px}
+.sheet-tab.active{background:#d2e3ff;border-color:#6c9de4}
+table.grid{border-collapse:collapse;white-space:pre-wrap;font-size:13px;min-width:100%}
+table.grid th,table.grid td{border:1px solid #d8dee8;padding:6px 9px;max-width:360px;overflow-wrap:anywhere;text-align:left}
+table.grid th{background:#edf2f8;position:sticky;top:0;color:#23344c}
+#textView{background:#fff;color:#222;border-radius:8px;padding:20px;white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;min-height:50vh}
+#imageView{display:flex;align-items:center;justify-content:center;min-height:50vh}
+#imageView img{max-width:100%;max-height:75vh;object-fit:contain}
+#htmlView{background:white;color:#222;border:0;width:100%;min-height:70vh;border-radius:8px}
+.notice{padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:#17243a;color:#c6d4e7}
+.notice strong{color:#fff}.error{border-color:#74434b;background:#321d27;color:#ffd4d4}
+footer{text-align:center;color:#73849d;font-size:12px;padding:18px;border-top:1px solid var(--line)}
+@media(max-width:600px){header{padding:0 13px}.header-right{display:none}main{padding:16px 10px 28px}.welcome{padding:28px 14px}.stage{padding:10px}.meta{width:100%;margin-left:0}.filetitle{max-width:70vw}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">S</div>
+  <div><div class="brand">SeeFile</div><div class="subbrand">A private, in-browser document viewer</div></div>
+  <div class="header-right">Files stay on your device · No upload</div>
+</header>
+<main>
+  <section class="welcome" id="welcome">
+    <h1>Open any document</h1>
+    <p>Choose a file from your device. SeeFile processes it inside your browser; your document is not uploaded to a server.</p>
+    <button class="open-btn" id="chooseBtn" type="button">Choose a document</button>
+    <input id="fileInput" type="file" accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.md,.json,.xml,.html,.htm,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.avif">
+    <div class="drop-hint">or drag and drop a file here</div>
+    <div class="support">
+      <span class="chip">PDF</span><span class="chip">DOCX</span><span class="chip">XLSX / XLS</span>
+      <span class="chip">CSV</span><span class="chip">TXT / MD</span><span class="chip">JSON / XML</span><span class="chip">Images</span><span class="chip">HTML</span>
+    </div>
+  </section>
+
+  <section id="viewer">
+    <div class="toolbar">
+      <button class="toolbtn" id="backBtn" type="button">← Open another</button>
+      <span class="filetitle" id="fileTitle"></span>
+      <span class="meta" id="fileMeta"></span>
+      <span id="pdfControls" hidden>
+        <button class="toolbtn" id="prevPage" type="button">Previous</button>
+        <span id="pageInfo">1 / 1</span>
+        <button class="toolbtn" id="nextPage" type="button">Next</button>
+        <button class="toolbtn" id="zoomOut" type="button">−</button>
+        <button class="toolbtn" id="zoomIn" type="button">+</button>
+        <button class="toolbtn" id="fitWidth" type="button">Fit width</button>
+      </span>
+    </div>
+    <div class="stage" id="stage">
+      <div class="empty">Select a document to begin.</div>
+    </div>
+  </section>
+</main>
+<footer>SeeFile · Local document rendering · Open-source project</footer>
+
+<!-- All runtime scripts are served from this repository. No CDN requests. -->
+<script src="vendor/pdfjs/pdf.min.js"></script>
+<script src="vendor/jszip/jszip.min.js"></script>
+<script src="vendor/docx/docx-preview.min.js"></script>
+<script src="vendor/xlsx/xlsx.full.min.js"></script>
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const fileInput = $("fileInput"), welcome = $("welcome"), viewer = $("viewer"), stage = $("stage");
+  let currentPdf = null, pdfPage = 1, pdfScale = 1.25, currentFileUrl = null, currentFile = null;
+
+  $("chooseBtn").addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", e => { if (e.target.files[0]) openFile(e.target.files[0]); });
+  $("backBtn").addEventListener("click", resetViewer);
+  ["dragenter","dragover"].forEach(type => document.addEventListener(type, e => { e.preventDefault(); welcome.style.borderColor="#78a9ff"; }));
+  ["dragleave","drop"].forEach(type => document.addEventListener(type, e => { e.preventDefault(); welcome.style.borderColor=""; }));
+  document.addEventListener("drop", e => { const f=e.dataTransfer.files[0]; if(f) openFile(f); });
+
+  function resetViewer() {
+    if (currentFileUrl) URL.revokeObjectURL(currentFileUrl);
+    currentFileUrl=null; currentPdf=null; currentFile=null; fileInput.value="";
+    viewer.style.display="none"; welcome.style.display="block";
+    $("pdfControls").hidden=true; stage.replaceChildren();
+  }
+  function showViewer(file) {
+    currentFile=file; welcome.style.display="none"; viewer.style.display="block";
+    $("fileTitle").textContent=file.name;
+    $("fileMeta").textContent=formatBytes(file.size);
+    $("pdfControls").hidden=true; stage.replaceChildren();
+  }
+  function formatBytes(n){if(n<1024)return n+" B";const u=["KB","MB","GB"];let i=-1;do{n/=1024;i++;}while(n>=1024&&i<u.length-1);return n.toFixed(1)+" "+u[i];}
+  function error(message) {
+    stage.innerHTML='<div class="notice error"><strong>Could not open this file.</strong><br>'+escapeHtml(message)+'</div>';
+  }
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+  async function openFile(file) {
+    showViewer(file);
+    const ext=(file.name.split(".").pop()||"").toLowerCase();
+    try {
+      if(ext==="pdf") return await openPdf(file);
+      if(ext==="docx") return await openDocx(file);
+      if(["xlsx","xls"].includes(ext)) return await openSheet(file);
+      if(["csv","tsv"].includes(ext)) return await openDelimited(file,ext);
+      if(["txt","md","json","xml"].includes(ext)) return await openText(file);
+      if(["html","htm"].includes(ext)) return await openHtml(file);
+      if(["png","jpg","jpeg","gif","webp","bmp","svg","avif"].includes(ext)) return await openImage(file);
+      throw new Error("This format is not supported yet: ."+ext);
+    } catch(err) {
+      console.error(err);
+      error(err && err.message ? err.message : String(err));
+    }
+  }
+
+  async function openPdf(file) {
+    if(!window.pdfjsLib) throw new Error("PDF.js library is missing. Check that vendor/pdfjs/pdf.min.js exists.");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("vendor/pdfjs/pdf.worker.min.js", document.baseURI).href;
+    const bytes=await file.arrayBuffer();
+    currentPdf=await pdfjsLib.getDocument({data:bytes}).promise;
+    pdfPage=1; pdfScale=1.25; $("pdfControls").hidden=false;
+    await renderPdfPage();
+  }
+  async function renderPdfPage() {
+    if(!currentPdf)return;
+    const page=await currentPdf.getPage(pdfPage), viewport=page.getViewport({scale:pdfScale});
+    const canvas=document.createElement("canvas"), ctx=canvas.getContext("2d");
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.floor(viewport.width*dpr);canvas.height=Math.floor(viewport.height*dpr);
+    canvas.style.width=Math.floor(viewport.width)+"px";canvas.style.height=Math.floor(viewport.height)+"px";canvas.className="pdf-page";
+    stage.replaceChildren();const holder=document.createElement("div");holder.id="pdfPages";holder.append(canvas);stage.append(holder);
+    await page.render({canvasContext:ctx,viewport,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null}).promise;
+    $("pageInfo").textContent=pdfPage+" / "+currentPdf.numPages;
+    $("prevPage").disabled=pdfPage<=1;$("nextPage").disabled=pdfPage>=currentPdf.numPages;
+  }
+  $("prevPage").onclick=()=>{if(pdfPage>1){pdfPage--;renderPdfPage();}};
+  $("nextPage").onclick=()=>{if(currentPdf&&pdfPage<currentPdf.numPages){pdfPage++;renderPdfPage();}};
+  $("zoomIn").onclick=()=>{pdfScale=Math.min(3,pdfScale+.15);renderPdfPage();};
+  $("zoomOut").onclick=()=>{pdfScale=Math.max(.5,pdfScale-.15);renderPdfPage();};
+  $("fitWidth").onclick=async()=>{if(!currentPdf)return;const p=await currentPdf.getPage(pdfPage);const base=p.getViewport({scale:1});pdfScale=Math.max(.5,Math.min(2.5,(stage.clientWidth-40)/base.width));renderPdfPage();};
+
+  async function openDocx(file) {
+    if(!window.docx || !window.JSZip) throw new Error("DOCX renderer or JSZip is missing. Check vendor/docx and vendor/jszip.");
+    const target=document.createElement("div");target.id="docxView";stage.replaceChildren(target);
+    await docx.renderAsync(file,target,null,{className:"docx",inWrapper:true,ignoreWidth:false,ignoreHeight:false,ignoreFonts:false,breakPages:true});
+  }
+  async function openSheet(file) {
+    if(!window.XLSX) throw new Error("SheetJS library is missing. Check vendor/xlsx/xlsx.full.min.js.");
+    const data=await file.arrayBuffer(), wb=XLSX.read(data,{type:"array",cellDates:true});
+    const wrapper=document.createElement("div");wrapper.id="sheetView";
+    const tabs=document.createElement("div");tabs.className="sheet-tabs";
+    const tableHost=document.createElement("div");
+    wrapper.append(tabs,tableHost);stage.replaceChildren(wrapper);
+    function selectSheet(name,btn){
+      tabs.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b===btn));
+      tableHost.replaceChildren();
+      const ws=wb.Sheets[name], rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:false});
+      const table=document.createElement("table");table.className="grid";
+      const tbody=document.createElement("tbody");
+      rows.forEach((row,ri)=>{
+        const tr=document.createElement("tr");
+        row.forEach(value=>{
+          const cell=document.createElement(ri===0?"th":"td");cell.textContent=value==null?"":String(value);tr.append(cell);
+        });
+        tbody.append(tr);
+      });
+      table.append(tbody);tableHost.append(table);
+    }
+    wb.SheetNames.forEach((name,i)=>{const b=document.createElement("button");b.className="sheet-tab";b.textContent=name;b.onclick=()=>selectSheet(name,b);tabs.append(b);if(i===0)selectSheet(name,b);});
+  }
+  async function openDelimited(file,ext) {
+    const text=await file.text(), rows=parseDelimited(text,ext==="tsv"?"\t":",");
+    renderRows(rows);
+  }
+  function parseDelimited(text,delimiter) {
+    const rows=[];let row=[],field="",quoted=false;
+    for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];
+      if(c==='"'&&quoted&&n==='"'){field+='"';i++;}
+      else if(c==='"')quoted=!quoted;
+      else if(c===delimiter&&!quoted){row.push(field);field="";}
+      else if((c==="\n"||c==="\r")&&!quoted){if(c==="\r"&&n==="\n")i++;row.push(field);rows.push(row);row=[];field="";}
+      else field+=c;
+    }
+    if(field.length||row.length){row.push(field);rows.push(row);}return rows;
+  }
+  function renderRows(rows) {
+    const host=document.createElement("div");host.id="sheetView";
+    const table=document.createElement("table");table.className="grid";const body=document.createElement("tbody");
+    rows.forEach((row,i)=>{const tr=document.createElement("tr");row.forEach(v=>{const c=document.createElement(i===0?"th":"td");c.textContent=v;tr.append(c);});body.append(tr);});
+    table.append(body);host.append(table);stage.replaceChildren(host);
+  }
+  async function openText(file) {
+    const content=await file.text(), pre=document.createElement("pre");pre.id="textView";pre.textContent=content;stage.replaceChildren(pre);
+  }
+  async function openHtml(file) {
+    const text=await file.text(), frame=document.createElement("iframe");frame.id="htmlView";frame.setAttribute("sandbox","");frame.srcdoc=text;stage.replaceChildren(frame);
+  }
+  async function openImage(file) {
+    if(currentFileUrl)URL.revokeObjectURL(currentFileUrl);
+    currentFileUrl=URL.createObjectURL(file);
+    const box=document.createElement("div");box.id="imageView";const img=document.createElement("img");img.alt=file.name;img.src=currentFileUrl;box.append(img);stage.replaceChildren(box);
+  }
+})();
+</script>
+</body>
+</html>
