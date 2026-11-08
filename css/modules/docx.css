@@ -1,0 +1,119 @@
+
+/* ========================================
+   SeeFile - DOCX Viewer
+======================================== */
+
+.document-stage.docx-stage {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  overflow-x: auto;
+  overflow-y: auto;
+
+  background: #e9edf2;
+
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Viewer wrapper */
+
+.docx-viewer {
+  width: 100%;
+  min-height: 100%;
+
+  padding: 24px 12px 40px;
+
+  box-sizing: border-box;
+}
+
+/* Style container created by docx-preview */
+
+.docx-styles {
+  display: contents;
+}
+
+/* Content container */
+
+.docx-content {
+  width: 100%;
+  min-height: 100%;
+}
+
+/* DOCX page wrapper */
+
+.docx-content .docx-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  min-height: 100%;
+
+  padding: 0;
+  margin: 0 auto;
+
+  background: transparent;
+}
+
+/* Individual Word pages */
+
+.docx-content .docx {
+  flex: 0 0 auto;
+
+  margin: 0 auto 20px !important;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+}
+
+/* Keep document images within their page */
+
+.docx-content .docx img {
+  max-width: 100%;
+}
+
+/* Loading */
+
+.docx-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 180px;
+
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Error */
+
+.docx-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 200px;
+  padding: 24px;
+
+  color: #dc2626;
+  text-align: center;
+}
+
+/* Mobile */
+
+@media (max-width: 520px) {
+  .docx-viewer {
+    padding: 12px 6px 24px;
+  }
+
+  .docx-content .docx {
+    margin-bottom: 12px !important;
+  }
+}

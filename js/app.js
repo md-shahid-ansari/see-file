@@ -1,6 +1,7 @@
 
 import { createPdfViewer } from "./modules/pdf/pdf-viewer.js";
 import { createCodeViewer } from "./modules/code/code-viewer.js";
+import { createDocxViewer } from "./modules/docx/docx-viewer.js";
 
 import {
   getFileExtension,
@@ -8,7 +9,10 @@ import {
   isSupportedTextExtension
 } from "./modules/code/language-map.js";
 
+// ------------------------------------
 // Elements
+// ------------------------------------
+
 const stage = document.getElementById("stage");
 const openFileButton = document.getElementById("open-file");
 const fileInput = document.getElementById("file-input");
@@ -20,7 +24,10 @@ const position = document.getElementById("position");
 const fileName = document.getElementById("file-name");
 const status = document.getElementById("status");
 
+// ------------------------------------
 // Viewers
+// ------------------------------------
+
 const pdfViewer = createPdfViewer({
   stage,
   maxWidth: 1100,
@@ -39,13 +46,43 @@ const pdfViewer = createPdfViewer({
 
 const codeViewer = createCodeViewer({ stage });
 
-// Open selected file
+const docxViewer = createDocxViewer({ stage });
+
+// ------------------------------------
+// Toolbar helpers
+// ------------------------------------
+
+function showPdfControls(show) {
+  previousButton.hidden = !show;
+  nextButton.hidden = !show;
+  position.hidden = !show;
+
+  if (!show) {
+    position.textContent = "- / -";
+  }
+}
+
+function clearFileName() {
+  fileName.textContent = "";
+}
+
+// ------------------------------------
+// File routing
+// ------------------------------------
+
 async function openFile(file) {
   if (!file) return;
 
   const extension = getFileExtension(file.name);
+
   const isPdf =
-    extension === "pdf" || file.type === "application/pdf";
+    extension === "pdf" ||
+    file.type === "application/pdf";
+
+  const isDocx =
+    extension === "docx" ||
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
   const isText =
     isSupportedTextExtension(extension) ||
@@ -57,12 +94,11 @@ async function openFile(file) {
 
     // PDF
     if (isPdf) {
+      docxViewer.close();
       codeViewer.close();
-      stage.classList.remove("code-stage");
 
-      previousButton.hidden = false;
-      nextButton.hidden = false;
-      position.hidden = false;
+      stage.classList.remove("code-stage", "docx-stage");
+      showPdfControls(true);
 
       await pdfViewer.open(file);
 
@@ -70,15 +106,29 @@ async function openFile(file) {
       return;
     }
 
-    // Code and text
+    // DOCX
+    if (isDocx) {
+      await pdfViewer.close();
+      codeViewer.close();
+
+      stage.classList.remove("code-stage");
+      showPdfControls(false);
+
+      await docxViewer.open(file);
+
+      status.textContent = "Word document opened successfully";
+      return;
+    }
+
+    // Code and Text
     if (isText) {
       await pdfViewer.close();
+      docxViewer.close();
 
+      stage.classList.remove("docx-stage");
       stage.classList.add("code-stage");
 
-      previousButton.hidden = true;
-      nextButton.hidden = true;
-      position.hidden = true;
+      showPdfControls(false);
 
       await codeViewer.open(file, getLanguage(extension));
 
@@ -88,18 +138,18 @@ async function openFile(file) {
 
     // Unsupported format
     await pdfViewer.close();
+    docxViewer.close();
     codeViewer.close();
 
-    stage.classList.remove("code-stage");
-
-    previousButton.hidden = true;
-    nextButton.hidden = true;
-    position.hidden = true;
+    stage.classList.remove("code-stage", "docx-stage");
+    showPdfControls(false);
 
     const message = document.createElement("div");
     message.className = "viewer-error";
     message.textContent =
-      "This file format is not supported yet.";
+      extension === "doc"
+        ? "Legacy .doc files are not supported yet. Please use .docx."
+        : "This file format is not supported yet.";
 
     stage.replaceChildren(message);
 
@@ -115,15 +165,19 @@ async function openFile(file) {
     message.textContent = "Unable to open this file.";
 
     stage.replaceChildren(message);
+    stage.classList.remove("code-stage", "docx-stage");
+    clearFileName();
   }
 }
 
+// ------------------------------------
 // Open file picker
+// ------------------------------------
+
 openFileButton.addEventListener("click", () => {
   fileInput.click();
 });
 
-// Handle selected file
 fileInput.addEventListener("change", async () => {
   const file = fileInput.files?.[0];
 
@@ -131,11 +185,13 @@ fileInput.addEventListener("change", async () => {
     await openFile(file);
   }
 
-  // Allow selecting the same file again
   fileInput.value = "";
 });
 
+// ------------------------------------
 // PDF navigation
+// ------------------------------------
+
 previousButton.addEventListener("click", () => {
   pdfViewer.previousPage();
 });
@@ -144,6 +200,9 @@ nextButton.addEventListener("click", () => {
   pdfViewer.nextPage();
 });
 
+// ------------------------------------
 // Initial state
-position.textContent = "- / -";
+// ------------------------------------
+
+showPdfControls(false);
 status.textContent = "Ready";
