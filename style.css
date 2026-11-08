@@ -31,12 +31,6 @@ button { font: inherit; }
   background: linear-gradient(145deg, #172740, #101a2a);
   box-shadow: 0 24px 80px rgba(0,0,0,.28);
 }
-.brand-mark {
-  width: 48px; height: 48px; margin: 0 auto 14px;
-  display: grid; place-items: center; border-radius: 14px;
-  background: linear-gradient(135deg, #8bb5ff, #a99aff);
-  color: #0b1220; font-weight: 900; font-size: 25px;
-}
 .home-card h1 { margin: 0; font-size: clamp(30px, 7vw, 42px); letter-spacing: -.04em; }
 .intro { max-width: 440px; margin: 10px auto 25px; color: var(--muted); }
 .primary-button {
