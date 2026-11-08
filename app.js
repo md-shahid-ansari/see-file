@@ -94,17 +94,40 @@
   }
 
   function setDocumentZoom(value) {
-    state.documentZoom = clamp(
-      value,
-      MIN_ZOOM,
-      MAX_ZOOM
-    );
+    const zoom = clamp(value, MIN_ZOOM, MAX_ZOOM);
+
+    state.documentZoom = zoom;
 
     const documentElement = stage.firstElementChild;
 
-    if (documentElement) {
-      // CSS zoom scales the document layout and its scroll area.
-      documentElement.style.zoom = String(state.documentZoom);
+    if (!documentElement) return;
+
+    documentElement.style.zoom = String(zoom);
+
+    // PDF needs a special layout when enlarged.
+    if (state.kind === "pdf") {
+      const pdfContainer = documentElement;
+
+      if (zoom > 1) {
+        /*
+        * Keep the zoomed container's visible base width
+        * equal to the viewer width.
+        *
+        * The actual canvas can overflow to the right,
+        * making the full enlarged page horizontally scrollable.
+        */
+        pdfContainer.style.width = `${100 / zoom}%`;
+        pdfContainer.style.maxWidth = "none";
+        pdfContainer.style.marginLeft = "0";
+        pdfContainer.style.marginRight = "0";
+        pdfContainer.style.alignItems = "flex-start";
+      } else {
+        pdfContainer.style.width = "100%";
+        pdfContainer.style.maxWidth = "1100px";
+        pdfContainer.style.marginLeft = "auto";
+        pdfContainer.style.marginRight = "auto";
+        pdfContainer.style.alignItems = "center";
+      }
     }
   }
 
