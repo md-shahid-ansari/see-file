@@ -95,30 +95,35 @@ async function openFile(file) {
   if (!file) return;
 
   const extension = getFileExtension(file.name);
+  const mime = (file.type || "").toLowerCase();
 
   const isPdf =
     extension === "pdf" ||
-    file.type === "application/pdf";
+    mime === "application/pdf";
 
   const isDocx =
     extension === "docx" ||
-    file.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-  const isSpreadsheet = [
-    "xlsx",
-    "xls",
-    "csv"
-  ].includes(extension);
+  const isSpreadsheet =
+    ["xlsx", "xls", "csv"].includes(extension) ||
+    [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "text/csv"
+    ].includes(mime);
 
-  const isPowerPoint = [
-    "pptx",
-    "ppt"
-  ].includes(extension);
+  const isPowerPoint =
+    ["pptx", "ppt"].includes(extension) ||
+    [
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-powerpoint",
+      "application/mspowerpoint"
+    ].includes(mime);
 
   const isText =
     isSupportedTextExtension(extension) ||
-    file.type.startsWith("text/");
+    mime.startsWith("text/");
 
   try {
     status.textContent = "Opening file...";
