@@ -5,10 +5,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>SeeFile - Document Viewer</title>
+  <!-- Primary SEO -->
+  <title>SeeFile – Free Online Document Viewer | Private & Secure</title>
+
   <meta
     name="description"
-    content="Open and view documents directly in your browser with SeeFile."
+    content="View PDF, Word, Excel, PowerPoint, CSV and text files online for free with SeeFile. A private, open-source document viewer that processes files locally in your browser. No uploads or account required."
+  >
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow">
+  <meta name="author" content="SeeFile">
+  <meta name="application-name" content="SeeFile">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Canonical URL -->
+  <link
+    rel="canonical"
+    href="https://md-shahid-ansari.github.io/see-file/"
+  >
+
+  <!-- Open Graph / Facebook / LinkedIn -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SeeFile – Free Online Document Viewer">
+  <meta
+    property="og:description"
+    content="Open and view PDF, Word, Excel, PowerPoint and text documents directly in your browser. Free, open source and privacy-first. Your files stay on your device."
+  >
+  <meta
+    property="og:url"
+    content="https://md-shahid-ansari.github.io/see-file/"
+  >
+  <meta property="og:site_name" content="SeeFile">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SeeFile – Free Online Document Viewer">
+  <meta
+    name="twitter:description"
+    content="View PDF, DOCX, Excel, PowerPoint and text files online for free. Private browser-based document viewing with no uploads or account required."
   >
 
   <!-- Base and application styles -->
@@ -28,6 +64,40 @@
   <script src="./vendor/jszip/jszip.min.js"></script>
   <script src="./vendor/docx/docx-preview.min.js"></script>
   <script src="./vendor/xlsx/xlsx.full.min.js"></script>
+
+  <!-- Structured Data: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SeeFile",
+    "url": "https://md-shahid-ansari.github.io/see-file/",
+    "description": "A free, open-source, privacy-first online document viewer that lets users view PDF, Word, Excel, PowerPoint, CSV and text files directly in their browser without uploading documents to a SeeFile server.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires a modern web browser with JavaScript support.",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "license": "https://opensource.org/licenses/MIT",
+    "featureList": [
+      "Free online document viewer",
+      "PDF document viewing",
+      "Word DOCX document viewing",
+      "Excel XLSX and XLS spreadsheet viewing",
+      "CSV file viewing",
+      "PowerPoint PPTX and PPT presentation viewing",
+      "Code and text file viewing",
+      "Local browser-based document processing",
+      "No account required",
+      "No document upload to a SeeFile server",
+      "Read-only document viewing"
+    ]
+  }
+  </script>
 
   <!-- Main application -->
   <script type="module" src="./js/app.js"></script>
